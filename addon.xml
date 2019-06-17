@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addon id="plugin.video.syncplay"
+version="1.0.0"
+name="SyncPlay"
+provider-name="haribertlondon">
+<requires>
+  <import addon="xbmc.python" version="2.25.0"/>
+</requires>
+<extension point="xbmc.python.pluginsource" library="main.py">
+  <provides>video</provides>
+</extension>
+<extension point="xbmc.addon.metadata">
+  <summary lang="en">SyncPlay Plugin</summary>
+  <description lang="en_GB">SyncPlay Plugin: Searches in network if other Kodis are playing a video and continues playing at the same position locally.</description>
+  <disclaimer lang="en_GB">--</disclaimer>
+  <assets>
+    <icon>icon.png</icon>
+    <fanart>fanart.jpg</fanart>
+  </assets>
+  <news>First Release</news>
+</extension>
+</addon>

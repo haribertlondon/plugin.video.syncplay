@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
     <category label="IP Adresses">
-        <setting label="IP-Address 1"     type="text"   id="ip1" default="192.168.0.66:8080"/>
+        <setting label="IP-Address 1"     type="text"   id="ip1" default="192.168.0.50:8080"/>
 		<setting label="IP-Address 2"     type="text"   id="ip2" default="192.168.0.40:8080"/>
-		<setting label="IP-Address 3"     type="text"   id="ip3" default="192.168.0.50:8080"/>
+		<setting label="IP-Address 3"     type="text"   id="ip3" default=""/>
 		<setting label="IP-Address 4"     type="text"   id="ip4" default=""/>
     </category>
 </settings>

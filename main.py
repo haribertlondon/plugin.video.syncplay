@@ -126,21 +126,34 @@ def list_videos():
 def set_position(position):
     for i in range(30*2): # wait 30 seconds        
         if xbmc.Player().isPlaying():
-            time.sleep(5)
-            for i in range(30*2): # wait 30 seconds                
-                try:
-                    xbmc.Player().seekTime(float(position))
-                except:            
-                    xbmc.log('Syncplayer: Seek did not work',level=xbmc.LOGNOTICE)
-                
-                if abs( float(xbmc.Player().getTime()) - float(position) )<60: #seek has worked +/- 60sec                                     
-                    xbmc.log('Syncplayer: Seek applied successfully',level=xbmc.LOGNOTICE)                    
-                    return True
+            xbmc.log('Syncplayer: Player says Item now playing. Now waiting until is is really playing',level=xbmc.LOGNOTICE)
+
+            
+            stableWait = 0.75
+
+            xbmc.log('Syncplayer: Waiting now for stability ' + str(stableWait),level=xbmc.LOGNOTICE)
+            
+            for j in range(30*2): #wait 30seconds                    
+                if xbmc.Player().getTime()> stableWait:
+                    xbmc.log('Syncplayer: Player has reached now '+str(xbmc.Player().getTime())+' sec',level=xbmc.LOGNOTICE)
+                    for i in range(30*2): # wait 30 seconds
+                        xbmc.log('Syncplayer: Try to seek '+str(float(position))+' sec',level=xbmc.LOGNOTICE)
+                        try:                            
+                            xbmc.Player().seekTime(float(position))
+                        except:            
+                            xbmc.log('Syncplayer: Seek did not work',level=xbmc.LOGNOTICE)
+                        
+                        if abs( float(xbmc.Player().getTime()) - float(position) )<60: #seek has worked +/- 60sec                                     
+                            xbmc.log('Syncplayer: Seek applied successfully',level=xbmc.LOGNOTICE)                    
+                            return True
+                        else:
+                            xbmc.log('Syncplayer: Seek has deviation of '+str(abs( float(xbmc.Player().getTime()) - float(position) )) + 'seconds. Wait again 0.5sec and try again',level=xbmc.LOGNOTICE)                    
+                            time.sleep(0.5)
                 else:
-                    xbmc.log('Syncplayer: Seek has deviation of '+str(abs( float(xbmc.Player().getTime()) - float(position) )) + 'seconds. Wait again 0.5sec and try again',level=xbmc.LOGNOTICE)                    
+                    xbmc.log('Syncplayer: Player says playing, but item is still at less than '+str(stableWait)+' seconds. Waiting...',level=xbmc.LOGNOTICE)
                     time.sleep(0.5)
         else:
-            xbmc.log('Syncplayer: Item is not playing yet. Waiting 0.5sec and try again...',level=xbmc.LOGNOTICE)                    
+            xbmc.log('Syncplayer: Item is not playing yet. Waiting 0.5 sec and try again...',level=xbmc.LOGNOTICE)
             time.sleep(0.5)
             
     xbmc.log('Syncplayer: Could not set position',level=xbmc.LOGNOTICE)
@@ -155,7 +168,11 @@ def play_video(path, position, ip, duration):
     
     xbmc.log('Syncplayer: maxposition=' + str(maxposition) + 'newpos=' + str(newPosition) + 'pos=' + str(position) + "percent="+ str(percentage) + ' dur=' + str(duration),level=xbmc.LOGNOTICE)
     xbmc.log('Syncplayer: Start play path'+str(path),level=xbmc.LOGNOTICE)
-    xbmc.Player().play(path)
+    #xbmc.Player().play(path)
+
+    play_item = xbmcgui.ListItem(path=path)
+    # Pass the item to the Kodi player.
+    xbmcplugin.setResolvedUrl(_handle, True, listitem=play_item)
     
     set_position(maxposition)
 

@@ -125,7 +125,8 @@ def list_videos():
     
 def set_position(position):
     for i in range(30*2): # wait 30 seconds        
-        if xbmc.Player().isPlaying():                  
+        if xbmc.Player().isPlaying():
+            time.sleep(5)
             for i in range(30*2): # wait 30 seconds                
                 try:
                     xbmc.Player().seekTime(float(position))
@@ -134,13 +135,16 @@ def set_position(position):
                 
                 if abs( float(xbmc.Player().getTime()) - float(position) )<60: #seek has worked +/- 60sec                                     
                     xbmc.log('Syncplayer: Seek applied successfully',level=xbmc.LOGNOTICE)                    
-                    return
+                    return True
                 else:
+                    xbmc.log('Syncplayer: Seek has deviation of '+str(abs( float(xbmc.Player().getTime()) - float(position) )) + 'seconds. Wait again 0.5sec and try again',level=xbmc.LOGNOTICE)                    
                     time.sleep(0.5)
         else:
+            xbmc.log('Syncplayer: Item is not playing yet. Waiting 0.5sec and try again...',level=xbmc.LOGNOTICE)                    
             time.sleep(0.5)
             
     xbmc.log('Syncplayer: Could not set position',level=xbmc.LOGNOTICE)
+    return False
 
 def play_video(path, position, ip, duration):
     # Create a playable item with a path to play.    
@@ -150,6 +154,7 @@ def play_video(path, position, ip, duration):
     maxposition =  max(newPosition, position)    
     
     xbmc.log('Syncplayer: maxposition=' + str(maxposition) + 'newpos=' + str(newPosition) + 'pos=' + str(position) + "percent="+ str(percentage) + ' dur=' + str(duration),level=xbmc.LOGNOTICE)
+    xbmc.log('Syncplayer: Start play path'+str(path),level=xbmc.LOGNOTICE)
     xbmc.Player().play(path)
     
     set_position(maxposition)

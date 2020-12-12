@@ -49,7 +49,10 @@ def getJSON(url,post, select):
         response.close()
         js = json.loads(html) #convert json -> dic 
         log(js)
-        return js['result'][select]
+        if select is not None:
+            return js['result'][select]
+        else:
+            return js['result']
     except Exception as e:        
         log('Syncplayer: Json Error: '+str(e) +' Url='+str(url) +' Post='+str(post) + ' Response' + str(html), level=xbmc.LOGNOTICE)
         return {}
@@ -73,16 +76,19 @@ def get_percentage(ip):
     return percentage
 
 
-def get_position(percentage, duration):
+def get_position(ip, duration):
+    percentage = get_percentage(ip)
     try:
         position = float(percentage) * float(duration) / 100.0            
     except:
         position = 0
         
+    log("Playing video: "+str(percentage)+'% Time: '+str(position)+' Duration: '+str(duration))
+        
     return position
 
 
-def set_position(position):
+def set_position(ip, duration):
     for i in range(30*2): # wait 30 seconds        
         if xbmc.Player().isPlaying():
             log('Syncplayer: Player says Item now playing. Now waiting until is is really playing',level=xbmc.LOGNOTICE)
@@ -95,6 +101,9 @@ def set_position(position):
             for j in range(30*2): #wait 30seconds                    
                 if xbmc.Player().getTime()> stableWait:
                     log('Syncplayer: Player has reached now '+str(xbmc.Player().getTime())+' sec',level=xbmc.LOGNOTICE)
+                    
+                    position =  get_position(ip, duration)
+                    
                     for i in range(30*2): # wait 30 seconds
                         log('Syncplayer: Try to seek '+str(float(position))+' sec',level=xbmc.LOGNOTICE)
                         try:                            
@@ -118,26 +127,18 @@ def set_position(position):
     log('Syncplayer: Could not set position',level=xbmc.LOGNOTICE)
     return False
 
-
+def start_videofile_from_beginning(path):
+    url = 'http://localhost:8080/jsonrpc'
+    post = '{ "jsonrpc": "2.0", "method": "Player.Open", "params": {"item":{"file":'+json.dumps(path)+'}},"id":1}'
+    
+    return getJSON(url, post, 'item')     
 
 def play_video(path, ip, duration):
     # Create a playable item with a path to play.    
     log("Playing video: "+str(path))
-    percentage = get_percentage(ip)    
-    position =  get_position(percentage, duration)  
-    log("Playing video: "+str(percentage)+' '+str(position))
-    url = 'http://localhost:8080/jsonrpc'
-    post = '{ "jsonrpc": "2.0", "method": "Player.Open", "params": {"item":{"file":'+json.dumps(path)+'}},"id":1}'
+        
+    start_videofile_from_beginning(path) 
     
-    dic = getJSON(url, post, 'item')      
-    
-    log('Syncplayer: maxposition=' + 'pos=' + str(position) + "percent="+ str(percentage) + ' dur=' + str(duration),level=xbmc.LOGNOTICE)
     log('Syncplayer: Start play path'+str(path), level=xbmc.LOGNOTICE)
-    #xbmc.Player().play(path)
-
-    #'{"jsonrpc": "2.0", "id": 1, "method": "Player.Open", "params": {"item": {"playlistid": '+str(playlistID)+', "position":'+str(searchStr)+' } ,"options":{"resume": true}} }'
-    #play_item = xbmcgui.ListItem(path=path)
-    # Pass the item to the Kodi player.
-    #xbmcplugin.setResolvedUrl(_handle, True, listitem=play_item)
     
-    set_position(position)
+    set_position(ip, duration)

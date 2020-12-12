@@ -10,9 +10,14 @@ import xbmcgui
 import xbmcplugin
 import urllib
 import general
+from urlparse import parse_qsl
+from urllib import urlencode
 
 _url = sys.argv[0] # Get the plugin url in plugin:// notation.
 _handle = int(sys.argv[1]) # Get the plugin handle as an integer number.
+
+def get_url(**kwargs):
+    return '{0}?{1}'.format(_url, urlencode(kwargs))
 
 
 def list_videos():
@@ -25,7 +30,7 @@ def list_videos():
     xbmcplugin.setContent(_handle, 'videos')
     # Get the list of videos in the category.
     ips = [ xbmcplugin.getSetting(_handle, "ip1"), xbmcplugin.getSetting(_handle, "ip2"), xbmcplugin.getSetting(_handle, "ip3"), xbmcplugin.getSetting(_handle, "ip4")]
-    videos = get_videos(ips, False)
+    videos = general.get_videos(ips, False)
     
     # Iterate through videos.
     for video in videos:

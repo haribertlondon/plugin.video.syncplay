@@ -27,7 +27,7 @@ def get_videos(ips, ExitOnFirstSuccess = False):
 
 def get_video(ip):    
     url = 'http://'+ip+'/jsonrpc'
-    post = '{"jsonrpc": "2.0", "method": "Player.GetItem", "params": { "properties": ["title", "file", "streamdetails"], "playerid": 1 }, "id": "VideoGetItem"}'
+    post = '{"jsonrpc": "2.0", "method": "Player.GetItem", "params": { "properties": ["title", "file", "streamdetails", "thumbnail", "fanart"], "playerid": 1 }, "id": "VideoGetItem"}'
     dic = getJSON(url,post,'item')
     
     if not dic or not dic['title']: # if no movie found, exit
@@ -57,8 +57,7 @@ def getJSON(url,post, select):
         log('Syncplayer: Json Error: '+str(e) +' Url='+str(url) +' Post='+str(post) + ' Response' + str(html), level=xbmc.LOGNOTICE)
         return {}
 
-def get_url(**kwargs):
-    return '{0}?{1}'.format(_url, urlencode(kwargs))
+
 
 
 def get_percentage(ip):      

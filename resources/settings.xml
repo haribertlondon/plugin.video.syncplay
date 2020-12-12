@@ -6,4 +6,8 @@
 		<setting label="IP-Address 3"     type="text"   id="ip3" default=""/>
 		<setting label="IP-Address 4"     type="text"   id="ip4" default=""/>
     </category>
+    
+    <category label="Autostart">
+        <setting label="AutoStart Remote Video"     type="bool"   id="autostart" default="false"/>
+    </category>
 </settings>

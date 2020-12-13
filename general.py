@@ -1,14 +1,22 @@
-import xbmc
-import xbmcplugin
 import json
-import urllib,urllib2
 import time
-import datetime
-from urllib import urlencode
-from urlparse import parse_qsl
+try:
+    import xbmc
+    import urllib2
+    from urllib import urlencode
+    from urlparse import parse_qsl
+    import urllib2 as urlrequest #@UnresolvedImport @Reimport
+except:
+    import urllib.request as urlrequest #@UnusedImport
 
-def log(s, level=xbmc.LOGNOTICE):
-    xbmc.log('[Syncplayer]:' + str(s),level)
+
+def log(s, level=None):
+    try:
+        if level is None:
+            level = xbmc.LOGNOTICE
+        xbmc.log('[Syncplayer]:' + str(s),level)
+    except:
+        print(str(s))
     
 
 def get_videos(ips, ExitOnFirstSuccess = False):    
@@ -30,7 +38,7 @@ def get_video(ip):
     post = '{"jsonrpc": "2.0", "method": "Player.GetItem", "params": { "properties": ["title", "file", "streamdetails", "thumbnail", "fanart"], "playerid": 1 }, "id": "VideoGetItem"}'
     dic = getJSON(url,post,'item')
     
-    if not dic or not dic['title']: # if no movie found, exit
+    if not dic or not dic['label']: # if no movie found, exit
         dic = {}
     else:
         dic['ip'] = ip
@@ -42,9 +50,15 @@ def get_video(ip):
 def getJSON(url,post, select):
     html = ""
     try:
-        req = urllib2.Request(url) #run html request
+        
+        try:   
+            post = str.encode(post) # set to byte array
+        except:
+            post = post.encode("utf-8")
+        
+        req = urlrequest.Request(url) #run html request
         req.add_header('Content-Type','application/json')
-        response = urllib2.urlopen(req, data = post, timeout=4)
+        response = urlrequest.urlopen(req, data = post, timeout=4)
         html=response.read()
         response.close()
         js = json.loads(html) #convert json -> dic 
@@ -54,7 +68,7 @@ def getJSON(url,post, select):
         else:
             return js['result']
     except Exception as e:        
-        log('Syncplayer: Json Error: '+str(e) +' Url='+str(url) +' Post='+str(post) + ' Response' + str(html), level=xbmc.LOGNOTICE)
+        log('Syncplayer: Json Error: '+str(e) +' Url='+str(url) +' Post='+str(post) + ' Response' + str(html))
         return {}
 
 
@@ -87,57 +101,29 @@ def get_position(ip, duration):
     return position
 
 
-def set_position(ip, duration):
-    for i in range(30*2): # wait 30 seconds        
-        if xbmc.Player().isPlaying():
-            log('Syncplayer: Player says Item now playing. Now waiting until is is really playing',level=xbmc.LOGNOTICE)
-
-            
-            stableWait = 0.75
-
-            log('Syncplayer: Waiting now for stability ' + str(stableWait),level=xbmc.LOGNOTICE)
-            
-            for j in range(30*2): #wait 30seconds                    
-                if xbmc.Player().getTime()> stableWait:
-                    log('Syncplayer: Player has reached now '+str(xbmc.Player().getTime())+' sec',level=xbmc.LOGNOTICE)
-                    
-                    position =  get_position(ip, duration)
-                    
-                    for i in range(30*2): # wait 30 seconds
-                        log('Syncplayer: Try to seek '+str(float(position))+' sec',level=xbmc.LOGNOTICE)
-                        try:                            
-                            xbmc.Player().seekTime(float(position))
-                        except:            
-                            log('Syncplayer: Seek did not work',level=xbmc.LOGNOTICE)
-                        
-                        if abs( float(xbmc.Player().getTime()) - float(position) )<60: #seek has worked +/- 60sec                                     
-                            log('Syncplayer: Seek applied successfully',level=xbmc.LOGNOTICE)                    
-                            return True
-                        else:
-                            log('Syncplayer: Seek has deviation of '+str(abs( float(xbmc.Player().getTime()) - float(position) )) + 'seconds. Wait again 0.5sec and try again',level=xbmc.LOGNOTICE)                    
-                            time.sleep(0.5)
-                else:
-                    log('Syncplayer: Player says playing, but item is still at less than '+str(stableWait)+' seconds. Waiting...',level=xbmc.LOGNOTICE)
-                    time.sleep(0.5)
-        else:
-            log('Syncplayer: Item is not playing yet. Waiting 0.5 sec and try again...',level=xbmc.LOGNOTICE)
-            time.sleep(0.5)
-            
-    log('Syncplayer: Could not set position',level=xbmc.LOGNOTICE)
-    return False
-
-def start_videofile_from_beginning(path):
+def start_videofile_from_resumePoint(path):
     url = 'http://localhost:8080/jsonrpc'
-    post = '{ "jsonrpc": "2.0", "method": "Player.Open", "params": {"item":{"file":'+json.dumps(path)+'}},"id":1}'
+    post = '{ "jsonrpc": "2.0", "method": "Player.Open", "params": {"item":{"file":'+json.dumps(path)+'},"options": {"resume": true}},"id":1}'
+    return getJSON(url, post, None)     
+
+def setResumePoint(path, position, duration):
+    url = 'http://localhost:8080/jsonrpc'
+    post = '{ "jsonrpc": "2.0", "method": "Files.SetFileDetails", "params": { "file":'+json.dumps(path)+', "media": "video", "resume": {"position":'+str(position)+',"total":'+str(duration)+'} },"id":1}'
     
-    return getJSON(url, post, 'item')     
+    return getJSON(url, post, None)
 
 def play_video(path, ip, duration):
     # Create a playable item with a path to play.    
     log("Playing video: "+str(path))
+    position =  get_position(ip, duration)
         
-    start_videofile_from_beginning(path) 
+    setResumePoint(path, position, duration)
+    start_videofile_from_resumePoint(path) 
     
-    log('Syncplayer: Start play path'+str(path), level=xbmc.LOGNOTICE)
+    log('Syncplayer: Start play path'+str(path))    
     
-    set_position(ip, duration)
+    
+if __name__ == "__main__":
+    path = 'sftp://192.168.0.100:22/share/Multimedia/Filme/Im_Norden_strahlt_der_Weihnachtsstern_19.12.16_20-15_disney_105_TVOON_DE.mpg.HQ.cut.avi'
+    play_video(path, "192.168.0.69",60*60)
+    print("Finished script")

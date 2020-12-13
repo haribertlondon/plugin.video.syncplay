@@ -42,7 +42,8 @@ def get_video(ip):
         dic = {}
     else:
         dic['ip'] = ip
-        dic['duration'] = dic['streamdetails']['video'][0]['duration'] 
+        dic['duration'] = dic['streamdetails']['video'][0]['duration']
+        dic['title'] = dic['label'] 
         dic['label'] = ip + ": " +dic['title']
     return dic 
 

@@ -7,7 +7,7 @@ import general
 if __name__ == '__main__':
     
     
-    general.log("SyncPlay start: "+str(time.time()) + str(sys.argv), level=xbmc.LOGNOTICE)
+    general.log("SyncPlay start: "+str(time.time()) + str(sys.argv), level=xbmc.LOGINFO)
     
     monitor = xbmc.Monitor()
     
@@ -20,12 +20,12 @@ if __name__ == '__main__':
     ip4=selfAddon.getSetting('ip4')
     ips = [ip1, ip2, ip3, ip4]
     
-    general.log("Autostart: " + str(autostart) + str(ips), level=xbmc.LOGNOTICE)
+    general.log("Autostart: " + str(autostart) + str(ips), level=xbmc.LOGINFO)
     
     if autostart:
         #check for autostart
         videos = general.get_videos(ips, True)  
-        general.log("Found Videos: " + str(videos), level=xbmc.LOGNOTICE)        
+        general.log("Found Videos: " + str(videos), level=xbmc.LOGINFO)        
         
         
         if videos is not None and len(videos)>0:
@@ -40,6 +40,6 @@ if __name__ == '__main__':
         #        break
             
             
-        #    general.log("hello addon! %s" % time.time(), level=xbmc.LOGNOTICE)
+        #    general.log("hello addon! %s" % time.time(), level=xbmc.LOGINFO)
     else:
-        general.log("No Autostart set. Exiting", level=xbmc.LOGNOTICE)
+        general.log("No Autostart set. Exiting", level=xbmc.LOGINFO)

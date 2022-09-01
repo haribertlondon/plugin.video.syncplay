@@ -8,10 +8,10 @@ import sys
 import xbmc
 import xbmcgui
 import xbmcplugin
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import general
-from urlparse import parse_qsl
-from urllib import urlencode
+from urllib.parse import parse_qsl
+from urllib.parse import urlencode
 
 _url = sys.argv[0] # Get the plugin url in plugin:// notation.
 _handle = int(sys.argv[1]) # Get the plugin handle as an integer number.

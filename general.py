@@ -2,9 +2,9 @@ import json
 import time
 try:
     import xbmc
-    import urllib2
-    from urllib import urlencode
-    from urlparse import parse_qsl
+    import urllib.request, urllib.error, urllib.parse
+    from urllib.parse import urlencode
+    from urllib.parse import parse_qsl
     import urllib2 as urlrequest #@UnresolvedImport @Reimport
 except:
     import urllib.request as urlrequest #@UnusedImport
@@ -16,7 +16,7 @@ def log(s, level=None):
             level = xbmc.LOGNOTICE
         xbmc.log('[Syncplayer]:' + str(s),level)
     except:
-        print(str(s))
+        print((str(s)))
     
 
 def get_videos(ips, ExitOnFirstSuccess = False):    
